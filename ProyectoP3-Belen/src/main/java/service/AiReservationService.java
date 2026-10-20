@@ -71,7 +71,7 @@ public class AiReservationService {
 
         // Cargar las categorías reales del sistema
         java.util.List<CategoriaRecurso> cats =
-                new repository.CategoriaXmlRepository().listarTodos();
+                repository.Repositories.categorias().listarTodos();
         StringBuilder listaCats = new StringBuilder();
         for (CategoriaRecurso c : cats) {
             listaCats.append("- ").append(c.getDescripcion()).append("\n");

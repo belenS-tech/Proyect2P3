@@ -41,8 +41,8 @@ public class ReservaController extends JPanel {
 
     public ReservaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
-        this.recursoRepo = new RecursoXmlRepository();
-        ReservaXmlRepository reservaRepo = new ReservaXmlRepository();
+        this.recursoRepo = repository.Repositories.recursos();
+        ReservaRepository reservaRepo = repository.Repositories.reservas();
         this.disponibilidadService = new DisponibilidadService(recursoRepo, reservaRepo);
         this.reservaService = new ReservaService(disponibilidadService, reservaRepo);
 
@@ -212,7 +212,7 @@ public class ReservaController extends JPanel {
 
     private void cargarCategorias() {
         modeloCategorias.clear();
-        for (CategoriaRecurso cat : new CategoriaService(new CategoriaXmlRepository()).listarTodos())
+        for (CategoriaRecurso cat : new CategoriaService(repository.Repositories.categorias()).listarTodos())
             modeloCategorias.addElement(cat);
         listCategorias.revalidate();
         listCategorias.repaint();

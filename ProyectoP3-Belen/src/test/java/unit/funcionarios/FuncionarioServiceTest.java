@@ -17,7 +17,8 @@ class FuncionarioServiceTest {
     @BeforeEach
     void prepararCadaPrueba() {
         usuarios = new UsuarioRepositoryEnMemoria();
-        servicio = new FuncionarioService(new FuncionarioRepositoryEnMemoria(), usuarios);
+        servicio = new FuncionarioService(new FuncionarioRepositoryEnMemoria(), usuarios,
+                new unit.estadisticas.ReservaRepositoryEnMemoria());
     }
 
     @Test

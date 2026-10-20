@@ -1,15 +1,11 @@
 package controller;
 
 import repository.CategoriaRepository;
-import repository.RecursoXmlRepository;
-import repository.ReservaXmlRepository;
 import view.MainView;
 import model.Usuario;
 import service.CategoriaService;
-import repository.CategoriaXmlRepository;
 import repository.FuncionarioRepository;
 import service.FuncionarioService;
-import repository.FuncionarioXmlRepository;
 import service.AuthService;
 import repository.UsuarioRepository;
 import view.CambiarClaveView;
@@ -42,8 +38,8 @@ public class LoginController {
 
             Usuario usuario = authService.iniciarSesion(id, clave);
 
-            vista.dispose();
             abrirVentanaPrincipal(usuario);
+            vista.dispose();
 
         } catch (IllegalArgumentException e) {
             vista.mostrarError(e.getMessage());
@@ -68,13 +64,13 @@ public class LoginController {
     }
 
     private void abrirVentanaPrincipal(Usuario usuario) {
-        FuncionarioRepository funcionarioRepository = new FuncionarioXmlRepository();
+        FuncionarioRepository funcionarioRepository = repository.Repositories.funcionarios();
         FuncionarioService funcionarioService =
-                new FuncionarioService(funcionarioRepository, usuarioRepository);
+                new FuncionarioService(funcionarioRepository, usuarioRepository, repository.Repositories.reservas());
 
-        CategoriaRepository categoriaRepository = new CategoriaXmlRepository();
+        CategoriaRepository categoriaRepository = repository.Repositories.categorias();
         CategoriaService categoriaService = new CategoriaService(
-                categoriaRepository, new RecursoXmlRepository(), new ReservaXmlRepository());
+                categoriaRepository, repository.Repositories.recursos(), repository.Repositories.reservas());
 
         MainView mainView = new MainView(usuario, funcionarioService, categoriaService);
         new MainController(mainView, authService, usuarioRepository);

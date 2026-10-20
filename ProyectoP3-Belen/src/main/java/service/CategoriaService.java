@@ -65,6 +65,10 @@ public class CategoriaService {
     }
 
     public void eliminar(String id) {
+        repository.Repositories.atomic(categoriaRepository, () -> eliminarInterno(id));
+    }
+
+    private void eliminarInterno(String id) {
         if (id == null || id.isBlank())
             throw new IllegalArgumentException("Debe seleccionar una categoría.");
         if (categoriaRepository.buscarPorId(id) == null)

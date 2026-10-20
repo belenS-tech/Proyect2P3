@@ -6,9 +6,7 @@ import controller.CategoriasController;
 import controller.FuncionariosController;
 import model.Rol;
 import model.Usuario;
-import repository.RecursoXmlRepository;
 import repository.ReservaRepository;
-import repository.ReservaXmlRepository;
 import service.CategoriaService;
 import service.FuncionarioService;
 
@@ -34,7 +32,7 @@ public class MainView extends JFrame {
                     CategoriaService categoriaService) {
         super("Sistema de Reserva de Recursos");
         construirVentana(usuarioActivo);
-        ReservaRepository reservaRepo = new ReservaXmlRepository();
+        ReservaRepository reservaRepo = repository.Repositories.reservas();
         agregarPestanasSegunRol(usuarioActivo, funcionarioService, categoriaService, reservaRepo);
     }
 
@@ -110,7 +108,7 @@ public class MainView extends JFrame {
         }
 
         CalendarizacionRecursosPanel panelCalendarizacion = new CalendarizacionRecursosPanel();
-        panelCalendarizacion.configurarDependencias(new RecursoXmlRepository(), reservaRepo, categoriaService);
+        panelCalendarizacion.configurarDependencias(repository.Repositories.recursos(), reservaRepo, categoriaService);
         agregarPestana("Calendarización", panelCalendarizacion);
 
         ProgramacionActividadesPanel panelActividades = new ProgramacionActividadesPanel();

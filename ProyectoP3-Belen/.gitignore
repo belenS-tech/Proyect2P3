@@ -39,3 +39,5 @@ build/
 .DS_Store
 
 *.pdf
+# Credenciales Oracle locales
+database.properties

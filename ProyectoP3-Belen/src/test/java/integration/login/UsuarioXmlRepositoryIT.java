@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UsuarioXmlRepositoryIT {
 
-    private static final String ARCHIVO = "usuarios.xml";
+    private static final String ARCHIVO = "src/main/resources/data/usuarios.xml";
     private File respaldo;
 
     @BeforeEach
@@ -22,7 +22,7 @@ class UsuarioXmlRepositoryIT {
         File original = new File(ARCHIVO);
         if (original.exists()) {
             respaldo = new File(ARCHIVO + ".bak");
-            original.renameTo(respaldo);
+            if (!original.renameTo(respaldo)) throw new IllegalStateException("No se pudo respaldar " + ARCHIVO);
         }
     }
 
@@ -30,7 +30,7 @@ class UsuarioXmlRepositoryIT {
     void restaurarArchivoReal() {
         new File(ARCHIVO).delete();
         if (respaldo != null && respaldo.exists()) {
-            respaldo.renameTo(new File(ARCHIVO));
+            if (!respaldo.renameTo(new File(ARCHIVO))) throw new IllegalStateException("No se pudo restaurar " + ARCHIVO);
         }
     }
 

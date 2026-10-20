@@ -4,7 +4,6 @@ import model.DetalleReserva;
 import model.EstadoReserva;
 import model.Recurso;
 import model.Reserva;
-import repository.RecursoXmlRepository;
 import repository.ReservaRepository;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public class ReservaService {
     }
 
     public ReservaService(ReservaRepository reservaRepository) {
-        this(new DisponibilidadService(new RecursoXmlRepository(), reservaRepository), reservaRepository);
+        this(new DisponibilidadService(repository.Repositories.recursos(), reservaRepository), reservaRepository);
     }
 
     public List<Reserva> listarTodos() {

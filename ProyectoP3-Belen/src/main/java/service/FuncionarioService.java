@@ -17,7 +17,7 @@ public class FuncionarioService {
 
     public FuncionarioService(FuncionarioRepository funcionarioRepository,
                               UsuarioRepository usuarioRepository) {
-        this(funcionarioRepository, usuarioRepository, new repository.ReservaXmlRepository());
+        this(funcionarioRepository, usuarioRepository, repository.Repositories.reservas());
     }
 
     public FuncionarioService(FuncionarioRepository funcionarioRepository,
@@ -51,6 +51,10 @@ public class FuncionarioService {
      * con la clave inicial igual al ID y rol FUNCIONARIO.
      */
     public void incluir(String id, String nombre, String telefono) {
+        repository.Repositories.atomic(funcionarioRepository, () -> incluirInterno(id, nombre, telefono));
+    }
+
+    private void incluirInterno(String id, String nombre, String telefono) {
         validarDatos(id, nombre, telefono);
 
         if (funcionarioRepository.buscarPorId(id.trim()) != null) {
@@ -83,6 +87,10 @@ public class FuncionarioService {
 
     /** Elimina el funcionario, su usuario y todas sus reservas. */
     public void eliminar(String id) {
+        repository.Repositories.atomic(funcionarioRepository, () -> eliminarInterno(id));
+    }
+
+    private void eliminarInterno(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Debe seleccionar un funcionario.");
         }

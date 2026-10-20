@@ -2,7 +2,6 @@ package controller;
 
 import service.AuthService;
 import repository.UsuarioRepository;
-import repository.UsuarioXmlRepository;
 import view.LoginView;
 
 import javax.swing.*;
@@ -14,7 +13,7 @@ import javax.swing.*;
 public class MainLogin {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            UsuarioRepository usuarioRepository = new UsuarioXmlRepository();
+            UsuarioRepository usuarioRepository = repository.Repositories.usuarios();
             AuthService authService = new AuthService(usuarioRepository);
 
             LoginView loginView = new LoginView();

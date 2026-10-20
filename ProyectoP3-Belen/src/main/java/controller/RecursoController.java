@@ -5,7 +5,6 @@ import model.CategoriaRecurso;
 import report.PdfReportService;
 import report.ReportHeader;
 import report.ReportTable;
-import repository.RecursoXmlRepository;
 import service.RecursoService;
 import service.CategoriaService;
 import service.SessionManager;
@@ -43,7 +42,7 @@ public class RecursoController extends JPanel {
 
     public RecursoController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
-        this.recursoService = new RecursoService(new RecursoXmlRepository());
+        this.recursoService = new RecursoService(repository.Repositories.recursos());
         construirPantalla();
         cargarCategorias();
         cargarTabla(recursoService.listarTodos());
