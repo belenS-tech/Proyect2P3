@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FilaActividad {
+public class FilaActividad implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String horaTexto;
     private final Map<LocalDate, String> valorDia;

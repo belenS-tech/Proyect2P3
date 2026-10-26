@@ -10,7 +10,7 @@ import repository.ReservaRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CategoriaService {
+public class CategoriaService implements api.CategoriaService {
 
     private static final String PREFIJO = "CAT-";
     private static final int LARGO_NUMERO = 6;

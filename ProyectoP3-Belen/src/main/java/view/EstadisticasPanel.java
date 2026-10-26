@@ -1,8 +1,6 @@
 package view;
 
 
-import repository.ReservaRepository;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -17,27 +15,12 @@ import java.awt.*;
 public class EstadisticasPanel extends JPanel {
 
     private final JTabbedPane tabbedPane;
-    private final CalendarizacionRecursosPanel.EstadisticasActividadesPanel panelActividades;
-
-    public EstadisticasPanel() {
+    public EstadisticasPanel(EstadisticasRecursosPanel panelRecursos, EstadisticasActividadesPanel panelActividades) {
         setLayout(new BorderLayout());
         tabbedPane = new JTabbedPane();
-        panelActividades = new CalendarizacionRecursosPanel.EstadisticasActividadesPanel();
-        add(tabbedPane, BorderLayout.CENTER);
-    }
-
-    /**
-     * Se debe llamar después de construir este panel, para inyectar
-     * las dependencias reales y el panel ya armado por Integrante 1.
-     *
-     * @param reservaRepo               repositorio real de reservas (Integrante 2)
-     * @param panelEstadisticasRecursos JPanel ya construido por Integrante 1
-*/
-    public void configurarDependencias(ReservaRepository reservaRepo, JPanel panelEstadisticasRecursos) {
-        panelActividades.configurarDependencias(reservaRepo);
-
-        tabbedPane.addTab("Estadísticas de Recursos", panelEstadisticasRecursos);
+        tabbedPane.addTab("Estadísticas de Recursos", panelRecursos);
         tabbedPane.addTab("Estadísticas de Actividades", panelActividades);
+        add(tabbedPane, BorderLayout.CENTER);
         Tema.aplicar(this);
     }
 }

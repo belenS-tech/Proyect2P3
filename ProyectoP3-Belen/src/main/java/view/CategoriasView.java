@@ -221,4 +221,15 @@ public class CategoriasView extends JPanel {
     public JTable getTabla() {
         return tabla;
     }
+    public String elegirRutaReporte(String nombre) {
+        javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
+        selector.setDialogTitle("Guardar reporte PDF");
+        selector.setCurrentDirectory(new java.io.File(System.getProperty("user.home")));
+        selector.setSelectedFile(new java.io.File(nombre));
+        selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos PDF (*.pdf)", "pdf"));
+        if (selector.showSaveDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION) return null;
+        String ruta = selector.getSelectedFile().getAbsolutePath();
+        if (!ruta.toLowerCase().endsWith(".pdf")) ruta += ".pdf";
+        return ruta;
+    }
 }

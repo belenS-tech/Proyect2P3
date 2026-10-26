@@ -5,7 +5,8 @@ import java.util.List;
 
 //contruir la matriz semanal
 
-public class ResultadoProgramacionActividades {
+public class ResultadoProgramacionActividades implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final List<LocalDate> dias;
     private final List<FilaActividad> filas;
 

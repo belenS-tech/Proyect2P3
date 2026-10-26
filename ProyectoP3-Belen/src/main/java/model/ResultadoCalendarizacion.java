@@ -1,7 +1,8 @@
 package model;
 
 import java.util.List;
-public class ResultadoCalendarizacion {
+public class ResultadoCalendarizacion implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private final List<Recurso> recursos;
     private final List<FilaCalendarizacion> filas;
 

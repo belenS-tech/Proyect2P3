@@ -1,6 +1,7 @@
 package model;
 
-public class DetalleReserva {
+public class DetalleReserva implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private CategoriaRecurso categoria;
     private Recurso recurso;

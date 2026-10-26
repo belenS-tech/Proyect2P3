@@ -8,7 +8,8 @@ import java.util.Map;
  * si el recurso está libre).
  *  se usa para mostrar la matriz en la tabla y luego en el reporte PDF.
  */
-public class FilaCalendarizacion {
+public class FilaCalendarizacion implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String horaTexto;
     private final Map<String, String> valoresPorRecursoId;

@@ -1,14 +1,6 @@
 package view;
 
-import controller.RecursoController;
-import controller.ReservaController;
-import controller.CategoriasController;
-import controller.FuncionariosController;
-import model.Rol;
 import model.Usuario;
-import repository.ReservaRepository;
-import service.CategoriaService;
-import service.FuncionarioService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,14 +18,11 @@ public class MainView extends JFrame {
     private JMenuItem itemCambiarClave;
     private JMenuItem itemCerrarSesion;
     private JMenuItem itemSalir;
+    private AlertasPanel panelAlertas;
 
-    public MainView(Usuario usuarioActivo,
-                    FuncionarioService funcionarioService,
-                    CategoriaService categoriaService) {
+    public MainView(Usuario usuarioActivo) {
         super("Sistema de Reserva de Recursos");
         construirVentana(usuarioActivo);
-        ReservaRepository reservaRepo = repository.Repositories.reservas();
-        agregarPestanasSegunRol(usuarioActivo, funcionarioService, categoriaService, reservaRepo);
     }
 
     private void construirVentana(Usuario usuario) {
@@ -52,7 +41,11 @@ public class MainView extends JFrame {
         pestanas.setForeground(new Color(200, 200, 255));
         pestanas.setFont(new Font("Segoe UI", Font.BOLD, 13));
         pestanas.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-        setContentPane(pestanas);
+        panelAlertas = new AlertasPanel();
+        JPanel content = new JPanel(new BorderLayout());
+        content.add(pestanas, BorderLayout.CENTER);
+        content.add(panelAlertas, BorderLayout.EAST);
+        setContentPane(content);
     }
 
     private JMenuBar construirMenu() {
@@ -81,45 +74,6 @@ public class MainView extends JFrame {
 
         barra.add(menuSistema);
         return barra;
-    }
-
-    /**
-     * Agrega únicamente las pestañas permitidas para el rol.
-     * El funcionario nunca ve los módulos administrativos.
-     */
-    private void agregarPestanasSegunRol(Usuario usuario,
-                                         FuncionarioService funcionarioService,
-                                         CategoriaService categoriaService,
-                                         ReservaRepository reservaRepo) {
-        if (usuario.getRol() == Rol.ADMINISTRADOR) {
-            FuncionariosView vistaFuncionarios = new FuncionariosView();
-            new FuncionariosController(vistaFuncionarios, funcionarioService);
-            agregarPestana("Funcionarios", vistaFuncionarios);
-
-            CategoriasView vistaCategorias = new CategoriasView();
-            new CategoriasController(vistaCategorias, categoriaService);
-            agregarPestana("Categorías", vistaCategorias);
-
-            agregarPestana("Recursos", new RecursoController(categoriaService));
-        }
-
-        if (usuario.getRol() == Rol.FUNCIONARIO) {
-            agregarPestana("Reservas", new ReservaController(categoriaService));
-        }
-
-        CalendarizacionRecursosPanel panelCalendarizacion = new CalendarizacionRecursosPanel();
-        panelCalendarizacion.configurarDependencias(repository.Repositories.recursos(), reservaRepo, categoriaService);
-        agregarPestana("Calendarización", panelCalendarizacion);
-
-        ProgramacionActividadesPanel panelActividades = new ProgramacionActividadesPanel();
-        panelActividades.configurarDependencias(reservaRepo);
-        agregarPestana("Actividades", panelActividades);
-
-        EstadisticasRecursosPanel panelEstadisticasRecursos = new EstadisticasRecursosPanel();
-        panelEstadisticasRecursos.configurarDependencias(reservaRepo);
-        EstadisticasPanel panelEstadisticas = new EstadisticasPanel();
-        panelEstadisticas.configurarDependencias(reservaRepo, panelEstadisticasRecursos);
-        agregarPestana("Estadísticas", panelEstadisticas);
     }
 
     /**
@@ -158,4 +112,5 @@ public class MainView extends JFrame {
     public JMenuItem getItemSalir() {
         return itemSalir;
     }
+    public AlertasPanel getPanelAlertas() { return panelAlertas; }
 }

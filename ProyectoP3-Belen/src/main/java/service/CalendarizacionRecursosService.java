@@ -3,6 +3,7 @@ package service;
 import model.*;
 import repository.RecursoRepository;
 import repository.ReservaRepository;
+import repository.FuncionarioRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,17 +14,21 @@ import java.util.stream.Collectors;
 /**
  * Construye la matriz de calendarización
 */
-public class CalendarizacionRecursosService {
-
-    private static final LocalTime HORA_INICIO_DIA = LocalTime.of(6, 0);
-    private static final LocalTime HORA_FIN_DIA = LocalTime.of(22, 0);
+public class CalendarizacionRecursosService implements api.CalendarizacionRecursosService {
 
     private final RecursoRepository recursoRepo;
     private final ReservaRepository reservaRepo;
+    private final FuncionarioRepository funcionarioRepo;
 
     public CalendarizacionRecursosService(RecursoRepository recursoRepo, ReservaRepository reservaRepo) {
+        this(recursoRepo, reservaRepo, repository.Repositories.funcionarios());
+    }
+
+    public CalendarizacionRecursosService(RecursoRepository recursoRepo, ReservaRepository reservaRepo,
+                                         FuncionarioRepository funcionarioRepo) {
         this.recursoRepo = recursoRepo;
         this.reservaRepo = reservaRepo;
+        this.funcionarioRepo = funcionarioRepo;
     }
 
     public ResultadoCalendarizacion construirMatriz(LocalDate fecha, String categoriaId) {
@@ -40,12 +45,13 @@ public class CalendarizacionRecursosService {
         }
 
         List<Reserva> reservasDelDia = reservaRepo.listar().stream()
-                .filter(r -> r.getEstado() == EstadoReserva.ACTIVA)
+                .filter(r -> r.getEstado() != EstadoReserva.CANCELADA)
                 .filter(r -> fecha.equals(r.getFecha()))
                 .collect(Collectors.toList());
 
         List<FilaCalendarizacion> filas = new ArrayList<>();
-        for (LocalTime hora = HORA_INICIO_DIA; hora.isBefore(HORA_FIN_DIA); hora = hora.plusHours(1)) {
+        for (int h = 0; h < 24; h++) {
+            LocalTime hora = LocalTime.of(h, 0);
             FilaCalendarizacion fila = new FilaCalendarizacion(hora.toString());
             for (Recurso recurso : recursos) {
                 fila.setValor(recurso.getId(), buscarOcupacion(reservasDelDia, hora, categoriaId, recurso.getId()));
@@ -58,8 +64,9 @@ public class CalendarizacionRecursosService {
 
     private String buscarOcupacion(List<Reserva> reservasDelDia, LocalTime hora,
                                    String categoriaId, String recursoId) {
+        List<String> ocupaciones = new ArrayList<>();
         for (Reserva reserva : reservasDelDia) {
-            boolean estaEnRango = !hora.isBefore(reserva.getHoraInicio()) && hora.isBefore(reserva.getHoraFin());
+            boolean estaEnRango = util.DateUtils.ocupaHora(reserva.getHoraInicio(), reserva.getHoraFin(), hora);
             if (!estaEnRango) continue;
 
             for (DetalleReserva detalle : reserva.getDetalles()) {
@@ -68,10 +75,13 @@ public class CalendarizacionRecursosService {
                 boolean mismoRecurso = detalle.getRecurso() != null
                         && recursoId.equals(detalle.getRecurso().getId());
                 if (mismaCategoria && mismoRecurso) {
-                    return reserva.getActividad() + " - " + reserva.getFuncionarioId();
+                    Funcionario funcionario = funcionarioRepo.buscarPorId(reserva.getFuncionarioId());
+                    ocupaciones.add(reserva.getActividad() + " - "
+                            + (funcionario == null ? reserva.getFuncionarioId() : funcionario.getNombre()));
+                    break;
                 }
             }
         }
-        return "";
+        return String.join(" | ", ocupaciones);
     }
 }

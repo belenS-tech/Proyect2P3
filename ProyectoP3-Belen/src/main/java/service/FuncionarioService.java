@@ -9,7 +9,7 @@ import repository.UsuarioRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FuncionarioService {
+public class FuncionarioService implements api.FuncionarioService {
 
     private final FuncionarioRepository funcionarioRepository;
     private final UsuarioRepository usuarioRepository;

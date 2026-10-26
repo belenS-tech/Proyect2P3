@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class EstadisticasRecursosService {
+public class EstadisticasRecursosService implements api.EstadisticasRecursosService {
 
     private final ReservaRepository reservaRepository;
 

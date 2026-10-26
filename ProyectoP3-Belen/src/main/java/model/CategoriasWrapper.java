@@ -10,7 +10,8 @@ import java.util.List;
 
 @XmlRootElement(name = "categorias")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CategoriasWrapper {
+public class CategoriasWrapper implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     @XmlElement(name = "categoria")
     private List<CategoriaRecurso> categorias;

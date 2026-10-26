@@ -6,7 +6,8 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "categoria")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CategoriaRecurso {
+public class CategoriaRecurso implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String descripcion;

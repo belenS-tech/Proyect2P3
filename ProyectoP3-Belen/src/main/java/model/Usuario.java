@@ -1,6 +1,7 @@
 package model;
 
-public class Usuario {
+public class Usuario implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String clave;

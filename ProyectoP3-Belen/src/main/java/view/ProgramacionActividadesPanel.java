@@ -1,17 +1,6 @@
 package view;
 
-
-import model.FilaActividad;
-import report.PdfReportService;
-import report.ReportException;
-import report.ReportHeader;
-import report.ReportTable;
-import repository.ReservaRepository;
-import service.ProgramacionActividadesService;
-import model.ResultadoProgramacionActividades;
-import util.DateUtils;
-import service.SessionManager;
-
+import model.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -20,11 +9,17 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import org.jfree.chart.*;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import javax.imageio.ImageIO;
 
-public class ProgramacionActividadesPanel extends JPanel {
-
+/** Presentación Swing; los eventos y servicios pertenecen a ProgramacionActividadesController. */
+public class ProgramacionActividadesPanel extends PanelReporte {
     private static final DateTimeFormatter FORMATO_ENCABEZADO_DIA = DateTimeFormatter.ofPattern("EEE dd/MM");
-
     private final JSpinner fechaReferenciaSpinner;
     private final JButton btnCargar;
     private final JButton btnImprimir;
@@ -32,12 +27,6 @@ public class ProgramacionActividadesPanel extends JPanel {
     private final JLabel lblMensaje;
     private final JTable tablaMatriz;
     private final DefaultTableModel modeloTabla;
-
-    private ProgramacionActividadesService service;
-    private final PdfReportService pdfReportService = new PdfReportService();
-
-    private ResultadoProgramacionActividades ultimoResultado;
-    private LocalDate ultimaFechaReferencia;
 
     public ProgramacionActividadesPanel() {
         setLayout(new BorderLayout(10, 10));
@@ -86,7 +75,9 @@ public class ProgramacionActividadesPanel extends JPanel {
         lblMensaje = new JLabel(" ");
         lblMensaje.setForeground(new Color(180, 0, 0));
 
-        modeloTabla = new DefaultTableModel();
+        modeloTabla = new DefaultTableModel() {
+            @Override public boolean isCellEditable(int fila, int columna) { return false; }
+        };
         modeloTabla.addColumn("Hora");
         tablaMatriz = new JTable(modeloTabla);
         tablaMatriz.setRowHeight(28);
@@ -94,37 +85,10 @@ public class ProgramacionActividadesPanel extends JPanel {
         add(panelSuperior, BorderLayout.NORTH);
         add(lblMensaje, BorderLayout.SOUTH);
         add(new JScrollPane(tablaMatriz), BorderLayout.CENTER);
-
-        btnCargar.addActionListener(e -> onCargar());
-        btnImprimir.addActionListener(e -> onImprimir());
         Tema.aplicar(this);
     }
 
-    public void configurarDependencias(ReservaRepository reservaRepo) {
-        this.service = new ProgramacionActividadesService(reservaRepo);
-    }
-
-    private void onCargar() {
-        lblMensaje.setText(" ");
-        java.util.Date fechaUtil = (java.util.Date) fechaReferenciaSpinner.getValue();
-        LocalDate fechaReferencia = fechaUtil.toInstant()
-                .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-
-        try {
-            ResultadoProgramacionActividades resultado = service.construirMatrizSemana(fechaReferencia);
-            this.ultimoResultado = resultado;
-            this.ultimaFechaReferencia = fechaReferencia;
-
-            lblSemana.setText(DateUtils.etiquetaSemana(fechaReferencia));
-            construirTabla(resultado);
-            btnImprimir.setEnabled(true);
-
-        } catch (IllegalArgumentException e) {
-            lblMensaje.setText(e.getMessage());
-        }
-    }
-
-    private void construirTabla(ResultadoProgramacionActividades resultado) {
+    public void mostrarResultado(ResultadoProgramacionActividades resultado) {
         modeloTabla.setColumnCount(0);
         modeloTabla.addColumn("Hora");
         for (LocalDate dia : resultado.getDias()) {
@@ -141,69 +105,11 @@ public class ProgramacionActividadesPanel extends JPanel {
             modeloTabla.addRow(valores.toArray());
         }
     }
-
-    private void onImprimir() {
-        if (ultimoResultado == null) {
-            lblMensaje.setText("Primero debe cargar una semana con datos.");
-            return;
-        }
-
-        try {
-            List<String> encabezados = new ArrayList<>();
-            encabezados.add("Hora");
-            for (LocalDate dia : ultimoResultado.getDias()) {
-                encabezados.add(dia.format(FORMATO_ENCABEZADO_DIA));
-            }
-
-            ReportTable tabla = new ReportTable(encabezados);
-            for (FilaActividad fila : ultimoResultado.getFilas()) {
-                List<String> valores = new ArrayList<>();
-                valores.add(fila.getHoraTexto());
-                for (LocalDate dia : ultimoResultado.getDias()) {
-                    valores.add(fila.getValor(dia));
-                }
-                tabla.agregarFila(valores);
-            }
-
-            String filtros = DateUtils.etiquetaSemana(ultimaFechaReferencia);
-            ReportHeader header = new ReportHeader(
-                    "Programación Semanal de Actividades",
-                    SessionManager.getInstancia().getUsuarioActual().getId(),
-                    filtros
-            );
-
-            String nombreSugerido = "actividades_" + ultimaFechaReferencia + ".pdf";
-            String ruta = elegirRutaGuardado(nombreSugerido);
-            if (ruta == null) {
-                return;
-            }
-
-            pdfReportService.generarReporteMatriz(ruta, header, tabla);
-            lblMensaje.setForeground(new Color(0, 122, 47));
-            lblMensaje.setText("Reporte generado en: " + ruta);
-
-        } catch (ReportException e) {
-            lblMensaje.setForeground(new Color(180, 0, 0));
-            lblMensaje.setText("Error al generar el PDF: " + e.getMessage());
-        }
-    }
-    /** Abre un diálogo "Guardar como" y devuelve la ruta elegida, o null si el usuario cancela. */
-    private String elegirRutaGuardado(String nombreSugerido) {
-        JFileChooser selector = new JFileChooser();
-        selector.setDialogTitle("Guardar reporte PDF");
-        selector.setSelectedFile(new java.io.File(nombreSugerido));
-        selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos PDF (*.pdf)", "pdf"));
-
-        int resultado = selector.showSaveDialog(this);
-        if (resultado != JFileChooser.APPROVE_OPTION) {
-            return null;
-        }
-
-        java.io.File archivo = selector.getSelectedFile();
-        String ruta = archivo.getAbsolutePath();
-        if (!ruta.toLowerCase().endsWith(".pdf")) {
-            ruta += ".pdf";
-        }
-        return ruta;
-    }
+    public JSpinner getFechaReferenciaSpinner() { return fechaReferenciaSpinner; }
+    public JButton getBtnCargar() { return btnCargar; }
+    public JButton getBtnImprimir() { return btnImprimir; }
+    public JLabel getLblSemana() { return lblSemana; }
+    public JLabel getLblMensaje() { return lblMensaje; }
+    public JTable getTablaMatriz() { return tablaMatriz; }
+    public DefaultTableModel getModeloTabla() { return modeloTabla; }
 }

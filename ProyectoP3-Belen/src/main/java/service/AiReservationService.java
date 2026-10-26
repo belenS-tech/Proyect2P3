@@ -9,7 +9,7 @@ import model.CategoriaRecurso;
 
 import java.time.LocalDate;
 
-public class AiReservationService {
+public class AiReservationService implements api.AiReservationService {
 
     private final Gson gson = new Gson();
 

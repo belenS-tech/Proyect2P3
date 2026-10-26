@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class DisponibilidadService {
+public class DisponibilidadService implements api.DisponibilidadService {
 
     private final RecursoRepository recursoRepository;
     private final ReservaRepository reservaRepository;

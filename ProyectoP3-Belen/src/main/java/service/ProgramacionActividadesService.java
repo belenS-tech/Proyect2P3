@@ -6,6 +6,8 @@ import model.EstadoReserva;
 import model.Reserva;
 import model.ResultadoProgramacionActividades;
 import repository.ReservaRepository;
+import repository.FuncionarioRepository;
+import model.Funcionario;
 import util.DateUtils;
 
 import java.time.LocalDate;
@@ -20,15 +22,18 @@ import java.util.stream.Collectors;
  * actividades programadas (puede haber varias por celda).
 */
 
-public class ProgramacionActividadesService {
-
-    private static final LocalTime HORA_INICIO_DIA = LocalTime.of(6, 0);
-    private static final LocalTime HORA_FIN_DIA = LocalTime.of(22, 0);
+public class ProgramacionActividadesService implements api.ProgramacionActividadesService {
 
     private final ReservaRepository reservaRepo;
+    private final FuncionarioRepository funcionarioRepo;
 
     public ProgramacionActividadesService(ReservaRepository reservaRepo) {
+        this(reservaRepo, repository.Repositories.funcionarios());
+    }
+
+    public ProgramacionActividadesService(ReservaRepository reservaRepo, FuncionarioRepository funcionarioRepo) {
         this.reservaRepo = reservaRepo;
+        this.funcionarioRepo = funcionarioRepo;
     }
 
     public ResultadoProgramacionActividades construirMatrizSemana(LocalDate fechaReferencia) {
@@ -45,12 +50,13 @@ public class ProgramacionActividadesService {
         }
 
         List<Reserva> reservasSemana = reservaRepo.listar().stream()
-                .filter(r -> r.getEstado() == EstadoReserva.ACTIVA)
+                .filter(r -> r.getEstado() != EstadoReserva.CANCELADA)
                 .filter(r -> !r.getFecha().isBefore(inicio) && !r.getFecha().isAfter(fin))
                 .collect(Collectors.toList());
 
         List<FilaActividad> filas = new ArrayList<>();
-        for (LocalTime hora = HORA_INICIO_DIA; hora.isBefore(HORA_FIN_DIA); hora = hora.plusHours(1)) {
+        for (int h = 0; h < 24; h++) {
+            LocalTime hora = LocalTime.of(h, 0);
             FilaActividad fila = new FilaActividad(hora.toString());
             for (LocalDate dia : dias) {
                 fila.setValor(dia, buscarActividad(reservasSemana, dia, hora));
@@ -67,10 +73,12 @@ public class ProgramacionActividadesService {
         for (Reserva reserva : reservasSemana) {
             if (!reserva.getFecha().equals(dia)) continue;
 
-            boolean estaEnRango = !hora.isBefore(reserva.getHoraInicio()) && hora.isBefore(reserva.getHoraFin());
+            boolean estaEnRango = DateUtils.ocupaHora(reserva.getHoraInicio(), reserva.getHoraFin(), hora);
             if (!estaEnRango) continue;
 
-            actividadesEnCelda.add(reserva.getActividad() + " (" + reserva.getFuncionarioId() + ")");
+            Funcionario funcionario = funcionarioRepo.buscarPorId(reserva.getFuncionarioId());
+            actividadesEnCelda.add(reserva.getActividad() + " ("
+                    + (funcionario == null ? reserva.getFuncionarioId() : funcionario.getNombre()) + ")");
         }
 
         return String.join(" | ", actividadesEnCelda);

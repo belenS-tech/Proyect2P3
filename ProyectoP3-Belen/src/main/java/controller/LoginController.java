@@ -1,13 +1,10 @@
 package controller;
 
-import repository.CategoriaRepository;
 import view.MainView;
 import model.Usuario;
-import service.CategoriaService;
-import repository.FuncionarioRepository;
-import service.FuncionarioService;
-import service.AuthService;
-import repository.UsuarioRepository;
+import api.CategoriaService;
+import api.FuncionarioService;
+import api.AuthService;
 import view.CambiarClaveView;
 import view.LoginView;
 
@@ -15,13 +12,10 @@ public class LoginController {
 
     private final LoginView vista;
     private final AuthService authService;
-    private final UsuarioRepository usuarioRepository;
 
-    public LoginController(LoginView vista, AuthService authService,
-                           UsuarioRepository usuarioRepository) {
+    public LoginController(LoginView vista, AuthService authService) {
         this.vista = vista;
         this.authService = authService;
-        this.usuarioRepository = usuarioRepository;
         registrarEventos();
     }
 
@@ -38,6 +32,7 @@ public class LoginController {
 
             Usuario usuario = authService.iniciarSesion(id, clave);
 
+            service.SessionManager.getInstancia().iniciarSesion(usuario);
             abrirVentanaPrincipal(usuario);
             vista.dispose();
 
@@ -64,16 +59,11 @@ public class LoginController {
     }
 
     private void abrirVentanaPrincipal(Usuario usuario) {
-        FuncionarioRepository funcionarioRepository = repository.Repositories.funcionarios();
-        FuncionarioService funcionarioService =
-                new FuncionarioService(funcionarioRepository, usuarioRepository, repository.Repositories.reservas());
+        FuncionarioService funcionarioService = client.Services.get(FuncionarioService.class);
+        CategoriaService categoriaService = client.Services.get(CategoriaService.class);
 
-        CategoriaRepository categoriaRepository = repository.Repositories.categorias();
-        CategoriaService categoriaService = new CategoriaService(
-                categoriaRepository, repository.Repositories.recursos(), repository.Repositories.reservas());
-
-        MainView mainView = new MainView(usuario, funcionarioService, categoriaService);
-        new MainController(mainView, authService, usuarioRepository);
+        MainView mainView = new MainView(usuario);
+        new MainController(mainView, authService, usuario, funcionarioService, categoriaService);
         mainView.setVisible(true);
     }
 }

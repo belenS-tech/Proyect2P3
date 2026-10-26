@@ -5,36 +5,33 @@ import model.Usuario;
 
 public class SessionManager {
 
-    private static SessionManager instancia;
-    private Usuario usuarioActual;
+    private static final SessionManager instancia = new SessionManager();
+    private final ThreadLocal<Usuario> usuarioActual = new ThreadLocal<>();
 
     private SessionManager() {
     }
 
     public static SessionManager getInstancia() {
-        if (instancia == null) {
-            instancia = new SessionManager();
-        }
         return instancia;
     }
 
     public Usuario getUsuarioActual() {
-        return usuarioActual;
+        return usuarioActual.get();
     }
 
     public void iniciarSesion(Usuario usuario) {
-        this.usuarioActual = usuario;
+        this.usuarioActual.set(usuario);
     }
 
     public void cerrarSesion() {
-        this.usuarioActual = null;
+        this.usuarioActual.remove();
     }
 
     public boolean haySesionActiva() {
-        return usuarioActual != null;
+        return usuarioActual.get() != null;
     }
 
     public boolean esAdministrador() {
-        return haySesionActiva() && usuarioActual.getRol() == Rol.ADMINISTRADOR;
+        return haySesionActiva() && usuarioActual.get().getRol() == Rol.ADMINISTRADOR;
     }
 }

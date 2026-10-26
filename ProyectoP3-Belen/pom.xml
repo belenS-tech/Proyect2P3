@@ -65,6 +65,41 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>frontend</id>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>frontend</classifier>
+                            <includes>
+                                <include>Main.class</include><include>client/**</include><include>controller/**</include>
+                                <include>view/**</include><include>api/**</include><include>network/**</include>
+                                <include>model/**</include><include>report/**</include><include>util/DateUtils*</include>
+                                <include>service/SessionManager*</include><include>service/AiReservationResponse*</include>
+                                <include>exception/**</include><include>icons/**</include>
+                            </includes>
+                            <archive><manifest><mainClass>Main</mainClass></manifest></archive>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>backend</id>
+                        <goals><goal>jar</goal></goals>
+                        <configuration>
+                            <classifier>backend</classifier>
+                            <includes>
+                                <include>server/**</include><include>service/**</include><include>repository/**</include>
+                                <include>database/**</include><include>api/**</include><include>network/**</include>
+                                <include>model/**</include><include>exception/**</include><include>util/**</include>
+                            </includes>
+                            <archive><manifest><mainClass>server.BackendMain</mainClass></manifest></archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>

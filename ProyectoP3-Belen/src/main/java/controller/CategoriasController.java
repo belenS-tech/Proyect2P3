@@ -5,12 +5,11 @@ import model.Usuario;
 import report.PdfReportService;
 import report.ReportHeader;
 import report.ReportTable;
-import service.CategoriaService;
+import api.CategoriaService;
 import service.SessionManager;
 import view.CategoriasView;
 
 import javax.swing.event.ListSelectionEvent;
-import java.io.File;
 import java.util.List;
 
 public class CategoriasController {
@@ -118,14 +117,8 @@ public class CategoriasController {
             String filtros = (filtro == null || filtro.isBlank()) ? "" : "Descripción: " + filtro.trim();
             ReportHeader header = new ReportHeader("Listado de Categorias", nombreUsuario, filtros);
 
-            javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
-            selector.setDialogTitle("Guardar reporte PDF");
-            selector.setCurrentDirectory(new File(System.getProperty("user.home")));
-            selector.setSelectedFile(new File("categorias.pdf"));
-            selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos PDF (*.pdf)", "pdf"));
-            if (selector.showSaveDialog(vista) != javax.swing.JFileChooser.APPROVE_OPTION) return;
-            String ruta = selector.getSelectedFile().getAbsolutePath();
-            if (!ruta.toLowerCase().endsWith(".pdf")) ruta += ".pdf";
+            String ruta = vista.elegirRutaReporte("categorias.pdf");
+            if (ruta == null) return;
 
             new PdfReportService().generarReporteTabla(ruta, header, tabla);
             vista.mostrarMensaje("Reporte generado: " + ruta);

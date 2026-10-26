@@ -5,7 +5,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Reserva {
+public class Reserva implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String actividad;

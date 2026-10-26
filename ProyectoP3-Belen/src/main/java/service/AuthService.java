@@ -3,7 +3,7 @@ package service;
 import model.Usuario;
 import repository.UsuarioRepository;
 
-public class AuthService {
+public class AuthService implements api.AuthService {
 
     private final UsuarioRepository usuarioRepository;
 
@@ -24,6 +24,7 @@ public class AuthService {
         if (!usuario.getClave().equals(clave)) {
             throw new IllegalArgumentException("La clave es incorrecta.");
         }
+
 
         SessionManager.getInstancia().iniciarSesion(usuario);
         return usuario;

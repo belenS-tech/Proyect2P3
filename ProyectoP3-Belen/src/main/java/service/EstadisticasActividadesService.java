@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 
-public class EstadisticasActividadesService {
+public class EstadisticasActividadesService implements api.EstadisticasActividadesService {
 
     private final ReservaRepository reservaRepo;
 
@@ -30,11 +30,15 @@ public class EstadisticasActividadesService {
         }
 
         List<Reserva> reservas = reservaRepo.listar().stream()
-                .filter(r -> r.getEstado() == EstadoReserva.ACTIVA)
+                .filter(r -> r.getEstado() != EstadoReserva.CANCELADA)
                 .filter(r -> !r.getFecha().isBefore(desde) && !r.getFecha().isAfter(hasta))
                 .collect(Collectors.toList());
 
         TreeMap<LocalDate, Integer> conteoPorInicioSemana = new TreeMap<>();
+        for (LocalDate semana = DateUtils.inicioSemana(desde);
+             !semana.isAfter(hasta); semana = semana.plusWeeks(1)) {
+            conteoPorInicioSemana.put(semana, 0);
+        }
         for (Reserva reserva : reservas) {
             LocalDate inicioSemana = DateUtils.inicioSemana(reserva.getFecha());
             conteoPorInicioSemana.merge(inicioSemana, 1, Integer::sum);

@@ -6,7 +6,8 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "funcionario")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Funcionario {
+public class Funcionario implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String nombre;

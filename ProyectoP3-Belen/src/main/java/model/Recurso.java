@@ -1,6 +1,7 @@
 package model;
 
-public class Recurso {
+public class Recurso implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
     private String id;
     private CategoriaRecurso categoria;
     private String descripcion;

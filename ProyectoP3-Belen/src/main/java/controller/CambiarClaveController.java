@@ -1,6 +1,6 @@
 package controller;
 
-import service.AuthService;
+import api.AuthService;
 import view.CambiarClaveView;
 
 public class CambiarClaveController {

@@ -5,12 +5,11 @@ import model.Usuario;
 import report.PdfReportService;
 import report.ReportHeader;
 import report.ReportTable;
-import service.FuncionarioService;
+import api.FuncionarioService;
 import service.SessionManager;
 import view.FuncionariosView;
 
 import javax.swing.event.ListSelectionEvent;
-import java.io.File;
 import java.util.List;
 
 public class FuncionariosController {
@@ -116,14 +115,8 @@ public class FuncionariosController {
             String nombreUsuario = usuarioActivo != null ? usuarioActivo.getId() : "";
             ReportHeader header = new ReportHeader("Listado de Funcionarios", nombreUsuario, describirFiltros());
 
-            javax.swing.JFileChooser selector = new javax.swing.JFileChooser();
-            selector.setDialogTitle("Guardar reporte PDF");
-            selector.setCurrentDirectory(new File(System.getProperty("user.home")));
-            selector.setSelectedFile(new File("funcionarios.pdf"));
-            selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Archivos PDF (*.pdf)", "pdf"));
-            if (selector.showSaveDialog(vista) != javax.swing.JFileChooser.APPROVE_OPTION) return;
-            String ruta = selector.getSelectedFile().getAbsolutePath();
-            if (!ruta.toLowerCase().endsWith(".pdf")) ruta += ".pdf";
+            String ruta = vista.elegirRutaReporte("funcionarios.pdf");
+            if (ruta == null) return;
 
             new PdfReportService().generarReporteTabla(ruta, header, tabla);
             vista.mostrarMensaje("Reporte generado: " + ruta);

@@ -10,7 +10,8 @@ import java.util.List;
 
 @XmlRootElement(name = "funcionarios")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class FuncionariosWrapper {
+public class FuncionariosWrapper implements java.io.Serializable {
+    private static final long serialVersionUID = 1L;
 
     @XmlElement(name = "funcionario")
     private List<Funcionario> funcionarios;

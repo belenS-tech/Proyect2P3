@@ -6,7 +6,7 @@ import repository.RecursoRepository;
 
 import java.util.List;
 
-public class RecursoService {
+public class RecursoService implements api.RecursoService {
     private final RecursoRepository repository;
 
     public RecursoService() {
