@@ -81,8 +81,8 @@ public class ReservaService implements api.ReservaService {
         if (guardada == null) {
             throw new IllegalArgumentException("No existe una reserva con ese ID.");
         }
-        if (reserva.getEstado() == EstadoReserva.CANCELADA && guardada.getEstado() != EstadoReserva.CANCELADA)
-            validarCancelacion(guardada);
+        // La fecha del cliente no puede convertir una reserva iniciada en futura.
+        validarFutura(guardada, "modificar");
         reservaRepository.actualizar(reserva);
     }
 
@@ -98,8 +98,12 @@ public class ReservaService implements api.ReservaService {
     }
 
     private void validarCancelacion(Reserva guardada) {
+        validarFutura(guardada, "cancelar");
+    }
+
+    private void validarFutura(Reserva guardada, String accion) {
         if (!LocalDateTime.of(guardada.getFecha(), guardada.getHoraInicio()).isAfter(LocalDateTime.now(clock)))
-            throw new IllegalArgumentException("Solo puede cancelar una reserva futura que no haya iniciado.");
+            throw new IllegalArgumentException("Solo puede " + accion + " una reserva futura que no haya iniciado.");
     }
 
     private void validarReservaBase(Reserva reserva) {

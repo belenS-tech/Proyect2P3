@@ -177,6 +177,43 @@ class SocketServicesIT {
         assertNotNull(reservations.buscarPorId("PAST"));
     }
 
+    @Test void noPermiteReprogramarReservaPasadaParaEludirCancelacionPorSocket() throws Exception {
+        var a = connect("a");
+        Reserva past = reservation("a",10); past.setId("PAST"); past.setFecha(LocalDate.of(2020,1,1));
+        reservations.guardar(past);
+        var service = a.service(api.ReservaService.class);
+        Reserva forged = service.buscarPorId("PAST"); forged.setFecha(day);
+        assertThrows(IllegalArgumentException.class, () -> service.actualizar(forged));
+        assertThrows(IllegalArgumentException.class, () -> service.eliminar(forged));
+        assertEquals(LocalDate.of(2020,1,1), service.buscarPorId("PAST").getFecha());
+    }
+
+    @Test void eliminarFuncionarioRevocaTodasSusConexionesYAlertasSinAfectarOtrosUsuarios() throws Exception {
+        var a = connect("a"); var same = connect("a"); var b = connect("b"); var admin = connect("admin");
+        BlockingQueue<Alert> removed = new LinkedBlockingQueue<>(), other = new LinkedBlockingQueue<>();
+        a.addAlertListener(removed::add); same.addAlertListener(removed::add); admin.addAlertListener(other::add);
+        admin.service(api.FuncionarioService.class).eliminar(" a ");
+        assertNull(users.buscarPorId("a"));
+        for (var revoked : List.of(a, same)) {
+            assertThrows(IllegalArgumentException.class, () -> revoked.service(api.ReservaService.class).listarTodos());
+            assertThrows(IllegalArgumentException.class, () -> revoked.service(api.AuthService.class).cambiarClave("a", "nueva", "nueva"));
+        }
+        b.service(api.ReservaService.class).registrar(reservation("b",11));
+        assertNotNull(other.poll(3, TimeUnit.SECONDS));
+        assertNull(removed.poll(200, TimeUnit.MILLISECONDS));
+        assertEquals(1, b.service(api.ReservaService.class).listarTodos().size());
+        // Reutilizar el ID no debe reactivar conexiones de la cuenta anterior.
+        admin.service(api.FuncionarioService.class).incluir("a", "Otra persona", "88888888");
+        assertThrows(IllegalArgumentException.class, () -> a.service(api.ReservaService.class).listarTodos());
+        assertEquals(1, connect("a").service(api.ReservaService.class).listarTodos().size());
+    }
+
+    @Test void eliminarFuncionarioInexistenteNoRevocaSesionesValidas() throws Exception {
+        var a = connect("a"); var admin = connect("admin");
+        assertThrows(IllegalArgumentException.class, () -> admin.service(api.FuncionarioService.class).eliminar("inexistente"));
+        assertNotNull(a.service(api.ReservaService.class).listarTodos());
+    }
+
     @Test void consultasAdministrativasSeRestringenEnServidorYLasCategoriasSiguenDisponibles() throws Exception {
         var employee = connect("a"); var admin = connect("admin"); var anonymous = connect(null);
         for (var denied : List.of(employee, anonymous)) {
